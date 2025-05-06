@@ -1,75 +1,89 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { useState } from 'react';
+import { View, Text, TextInput, Button, KeyboardAvoidingView, Platform, StyleSheet, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const [input, setInput] = useState('');
+  const [chatLog, setChatLog] = useState<string[]>([]);
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+    // In a real app, you'd send `input` to your chatbot or API
+    setChatLog((prev) => [...prev, `🗣️ You: ${input}`, `🤖 Bot: Nah I'm not in the mood to help!`]);
+    setInput('');
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.select({ ios: 'padding', android: undefined })}
+    >
+      <ScrollView contentContainerStyle={styles.chatSection}>
+        <Text style={styles.title}>How can I help today?</Text>
+        <Text style={styles.subtext}>Try: "What can I make with eggs?" or "How can I make pancakes?"</Text>
+
+        {chatLog.map((msg, index) => (
+          <Text key={index} style={styles.chatMessage}>
+            {msg}
+          </Text>
+        ))}
+      </ScrollView>
+
+      <TextInput
+        value={input}
+        onChangeText={setInput}
+        placeholder="Type your question..."
+        style={styles.input}
+        onSubmitEditing={handleSend}
+        returnKeyType="send"
+      />
+
+      <View style={styles.buttonSection}>
+        <Button title="Add Ingredient" onPress={() => router.push('/add')} />
+        <Button title="View Ingredients" onPress={() => router.push('/ingredients')} />
+        <Button title="Generate Meal Plan" onPress={() => router.push('/meal-plan')} />
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  chatSection: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  title: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  subtext: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 10,
+  },
+  chatMessage: {
+    fontSize: 16,
+    marginVertical: 4,
+    backgroundColor: '#f1f1f1',
+    padding: 8,
+    borderRadius: 6,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginBottom: 10,
+  },
+  buttonSection: {
+    gap: 10,
   },
 });
